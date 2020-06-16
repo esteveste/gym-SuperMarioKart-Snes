@@ -1,0 +1,266 @@
+### FROM Sethbling MarIQ lua files
+function getLap()
+	return mainmemory.readbyte(0x10C1)-128
+end
+
+ButtonNames = {
+	"Left",
+	"Right",
+	"B",
+}
+
+
+##setup -> bytes
+local MenuOption = 0x85
+local Lap = 0x10C1
+local KartX = 0x101C
+local KartState = 0x1010
+local StateTimer = 0x1DEC
+local StateTimerHigh = 0x1DED
+local LakituTimer = 0x1C38
+local GameMode = 0x36
+local DrivingMode = 0x3A
+local CameraX = 0x8D
+
+##show rewards
+function getCheckpoint()
+	local checkpoint = mainmemory.readbyte(0x0010DC)
+	local lapsize = mainmemory.readbyte(0x000148)
+	local lap = mainmemory.readbyte(0x0010C1)-128
+	local rank = mainmemory.readbyte(0x1040)/2+1
+
+	return checkpoint + (lap)*lapsize
+end
+
+
+####
+
+###smkscreen (weird)
+FirstMap = 0x00
+LastMap = 0x13
+NumMaps = LastMap - FirstMap + 1
+
+ExtraInputNames = {
+	"Speed",
+	"Backwards",
+	"Item Box",
+}
+cfg.ExtraInputs = NumMaps + #ExtraInputNames
+
+
+##important
+
+function getPositions(player)
+	if player == 1 then
+		kartX = mainmemory.read_s16_le(0x88)
+		kartY = mainmemory.read_s16_le(0x8C)
+			
+		direction = mainmemory.readbyte(0x95)
+		kartSpeed = mainmemory.read_s16_le(0x10EA)
+	else
+		kartX = mainmemory.read_s16_le(0x8A)
+		kartY = mainmemory.read_s16_le(0x8E)
+			
+		direction = mainmemory.readbyte(0x112B)
+		kartSpeed = mainmemory.read_s16_le(0x11EA)
+	end
+end
+
+function SMKScreen.getPosition()
+	return {kartX, kartY, direction}
+end
+
+function getLap()
+	return mainmemory.readbyte(0x10C1)-128
+end
+
+### probably surface type
+function getSurface()
+	if mainmemory.readbyte(0x10AE) == 64 then
+		return 1
+	end
+	if mainmemory.readbyte(0x10AE) == 84 then
+		return 0
+	end
+	if mainmemory.readbyte(0x10AE) == 128 then
+		return -1
+	end
+end
+
+
+
+function getItemBox()
+	return mainmemory.readbyte(0xD70)
+end
+
+
+function isTurnedAround()
+	if bit.band(mainmemory.readbyte(0x10B), 0x10) ~= 0 then
+		return 1
+	else
+		return 0
+	end
+end
+
+
+### reads physics on tile
+### is a byte
+function getPhysics(physics)
+	if physics == 0x54 then --dirt
+		return 0
+	elseif physics == 0x5A then --lily pads/grass
+		return 0
+	elseif physics == 0x5C then --shallow water
+		return 0
+	elseif physics == 0x58 then --snow
+		return 0
+	elseif physics == 0x56 then --chocodirt
+		return -0.5
+	elseif physics == 0x40 then --road
+		return 1
+	elseif physics == 0x46 then --dirt road
+		return 0.75
+	elseif physics == 0x52 then --loose dirt
+		return 0.5
+	elseif physics == 0x42 then --ghost road
+		return 1
+	elseif physics == 0x10 then --jump pad
+		return 1.5
+	elseif physics == 0x4E then --light ghost road
+		return 1
+	elseif physics == 0x50 then --wood bridge
+		return 1
+	elseif physics == 0x1E then --starting line
+		return 1
+	elseif physics == 0x44 then --castle road
+		return 1
+	elseif physics == 0x16 then --speed boost
+		return 2
+	elseif physics == 0x80 then --wall
+		return -1.5
+	elseif physics == 0x26 then	--oob grass
+		return -1.5
+	elseif physics == 0x22 then --deep water
+		return -1
+	elseif physics == 0x20 then --pit
+		return -2
+	elseif physics == 0x82 then --ghost house border
+		return -1.5
+	elseif physics == 0x24 then --lava
+		return -2
+	elseif physics == 0x4C then --choco road
+		return 1
+	elseif physics == 0x12 then --choco bump
+		return 0.75
+	elseif physics == 0x1C then --choco bump
+		return 0.75
+	elseif physics == 0x5E then --mud
+		return 0.5
+	elseif physics == 0x48 then --wet sand
+		return 0.75
+	elseif physics == 0x4A then --sand road
+		return 1
+	elseif physics == 0x84 then --ice blocks
+		return -1.5
+	elseif physics == 0x28 then --unsure
+		return -1
+	elseif physics == 0x14 then --? box
+		return 1.5
+	elseif physics == 0x1A then --coin
+		return 1.25
+	elseif physics == 0x18 then --oil spill
+		return -0.75
+	else
+		print("Error reading physics type " .. bizstring.hex(physics) .. " for tile " .. bizstring.hex(tile) .. " at x=" .. x .. ", y=" .. y)
+		return 0
+	end
+end
+
+# previous with this, forms a current physics map I guess
+## I BELIEVE this is the simplefied view 128 by 128
+function readMap()
+	map = {}
+
+	for x=1,128 do
+		map[x] = {}
+		for y=1,128 do
+			local tile = mainmemory.readbyte(0x10000+((x-1)+(y-1)*128)*1)
+
+			map[x][y] = getPhysics(memory.readbyte(0xB00+tile))
+		end
+	end
+end
+
+### course byte
+function getCourse()
+	return mainmemory.readbyte(0x124)
+end
+
+# what game modes?
+function getGameMode()
+	return mainmemory.readbyte(0xB5)
+end
+
+
+-- somekind of is not done function
+function SMKScreen.isGameplay()
+	if getGameMode() ~= 0x1C then
+		return false
+	end
+
+	local lap = getLap()
+	if lap >= 5 then
+		return false
+	end
+	
+	if lap < 0 then
+		return false
+	end
+	
+	return true
+end
+
+--- seams current checkpoint number
+function SMKScreen.getCheckpoint()
+	local checkpoint = mainmemory.readbyte(0x0010DC)
+	local lapsize = mainmemory.readbyte(0x000148)
+	local lap = mainmemory.readbyte(0x0010C1)-128
+	local rank = mainmemory.readbyte(0x1040)/2+1
+
+	return checkpoint + (lap)*lapsize
+end
+
+-- total checkpoint numbers
+function SMKScreen.getTotalCheckpoints()
+	return mainmemory.readbyte(0x000148) * 5
+end
+
+-- what frame? current frame (position in checkpoint) it seams
+function getFrame()
+	return mainmemory.read_u16_le(0x38)
+end
+
+--global vars
+prevCheckpoint = SMKScreen.getCheckpoint() 
+prevFrame = getFrame()
+function SMKScreen.reward()
+	local newCheckpoint = SMKScreen.getCheckpoint()
+	
+	local curFrame = getFrame()
+	if curFrame < prevFrame or curFrame > prevFrame + 60 then
+		prevCheckpoint = SMKScreen.getCheckpoint()
+	end
+	prevFrame = curFrame
+	
+	local reward = 0
+	--- this will give rewards of 100 on each cross
+	reward = reward + (newCheckpoint - prevCheckpoint) * 100
+	prevCheckpoint = newCheckpoint
+
+	-- Sanity check
+	if reward < -5000 then
+		return 0
+	end
+	
+	return reward
+end

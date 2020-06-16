@@ -1,0 +1,124 @@
+{
+  "info": {
+    "CameraX": {
+      "address": 141,
+      "type": "|u1"
+    },
+    "DrivingMode": {
+      "address": 58,
+      "type": "|u1"
+    },
+    "GameMode": {
+      "address": 54,
+      "type": "|u1"
+    },
+    "KartState": {
+      "address": 4112,
+      "type": "|u1"
+    },
+    "LakituTimer": {
+      "address": 7224,
+      "type": "|u1"
+    },
+    "MenuOption": {
+      "address": 133,
+      "type": "|u1"
+    },
+    "Some_KartX": {
+      "address": 4124,
+      "type": "|u1"
+    },
+    "StateTimer": {
+      "address": 7660,
+      "type": "|u1"
+    },
+    "StateTimerHigh": {
+      "address": 7661,
+      "type": "|u1"
+    },
+    "coins": {
+      "address": 3584,
+      "type": "=u1"
+    },
+    "course": {
+      "address": 292,
+      "type": "|u1"
+    },
+    "currMiliSec": {
+      "address": 256,
+      "type": "<d2"
+    },
+    "currMin": {
+      "address": 260,
+      "type": "<d2"
+    },
+    "currSec": {
+      "address": 258,
+      "type": "<d2"
+    },
+    "currTest": {
+      "address": 255,
+      "type": "<d4"
+    },
+    "current_checkpoint": {
+      "address": 4316,
+      "type": "|u1"
+    },
+    "getFrame": {
+      "address": 56,
+      "type": "<i2"
+    },
+    "getGameMode": {
+      "address": 181,
+      "type": "|u1"
+    },
+    "isTurnedAround": {
+      "address": 267,
+      "type": "|u1"
+    },
+    "item_box": {
+      "address": 3440,
+      "type": "|u1"
+    },
+    "kart1_X": {
+      "address": 136,
+      "type": "<i2"
+    },
+    "kart1_Y": {
+      "address": 140,
+      "type": "<i2"
+    },
+    "kart1_direction": {
+      "address": 149,
+      "type": "|u1"
+    },
+    "kart1_speed": {
+      "address": 4330,
+      "type": "<i2"
+    },
+    "lap": {
+      "address": 4289,
+      "type": "|u1"
+    },
+    "lapsize": {
+      "address": 328,
+      "type": "|u1"
+    },
+    "rank": {
+      "address": 4160,
+      "type": "|u1"
+    },
+    "surface": {
+      "address": 4270,
+      "type": "|u1"
+    },
+    "test4": {
+      "address": 8387503,
+      "type": "<u2"
+    },
+    "totalCheckpoints": {
+      "address": 328,
+      "type": "|u1"
+    }
+  }
+}
